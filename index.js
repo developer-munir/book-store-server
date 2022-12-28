@@ -12,11 +12,11 @@ app.get("/", (req, res) => {
   res.send("book store server running");
 });
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xsnvn7k.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.r7d25w3.mongodb.net/?retryWrites=true&w=majority`;
+
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverApi: ServerApiVersion.v1,
+  useUnifiedTopology: true, serverApi: ServerApiVersion.v1
 });
 
 const book = async () => {
@@ -34,23 +34,19 @@ const book = async () => {
       const cetegoris = await productCetegorisData.find({}).toArray();
       res.send(cetegoris);
     });
-    // offers
-    app.get("/offer/30%", async (req, res) => {
-      const query = { discount: "30" };
-      const discountItems = await productsData.find(query).toArray();
+    // get all cetegoris from db
+
+    app.get("/offer/:offer", async (req, res) => {
+      const offer = req.params.offer;
+      const query = { discount: offer };
+      const discountItems = await productsData.find(query).limit(6).toArray();
       res.send(discountItems);
     });
-    app.get("/offer/40%", async (req, res) => {
-      const query = { discount: "40" };
-      const discountItems = await productsData.find(query).toArray();
-      res.send(discountItems);
-    });
-    app.get("/offer/60%", async (req, res) => {
-      const query = { discount: "60" };
-      const discountItems = await productsData.find(query).toArray();
-      res.send(discountItems);
-    });
-  } finally {
+    // get offer books from db 
+
+  }
+
+  finally {
   }
 };
 book().catch((error) => console.log(error));
