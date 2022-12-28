@@ -12,11 +12,11 @@ app.get("/", (req, res) => {
   res.send("book store server running");
 });
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xsnvn7k.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.r7d25w3.mongodb.net/?retryWrites=true&w=majority`;
+
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverApi: ServerApiVersion.v1,
+  useUnifiedTopology: true, serverApi: ServerApiVersion.v1
 });
 
 const book = async () => {
@@ -40,11 +40,13 @@ const book = async () => {
       const discountItems = await productsData.find(query).toArray();
       res.send(discountItems);
     });
+
     app.get("/offer/40%", async (req, res) => {
       const query = { discount: "40" };
       const discountItems = await productsData.find(query).toArray();
       res.send(discountItems);
     });
+
     app.get("/offer/60%", async (req, res) => {
       const query = { discount: "60" };
       const discountItems = await productsData.find(query).toArray();
