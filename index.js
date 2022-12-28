@@ -34,25 +34,19 @@ const book = async () => {
       const cetegoris = await productCetegorisData.find({}).toArray();
       res.send(cetegoris);
     });
-    // offers
-    app.get("/offer/30%", async (req, res) => {
-      const query = { discount: "30" };
-      const discountItems = await productsData.find(query).toArray();
-      res.send(discountItems);
-    });
+    // get all cetegoris from db
 
-    app.get("/offer/40%", async (req, res) => {
-      const query = { discount: "40" };
-      const discountItems = await productsData.find(query).toArray();
+    app.get("/offer/:offer", async (req, res) => {
+      const offer = req.params.offer;
+      const query = { discount: offer };
+      const discountItems = await productsData.find(query).limit(6).toArray();
       res.send(discountItems);
     });
+    // get offer books from db 
 
-    app.get("/offer/60%", async (req, res) => {
-      const query = { discount: "60" };
-      const discountItems = await productsData.find(query).toArray();
-      res.send(discountItems);
-    });
-  } finally {
+  }
+
+  finally {
   }
 };
 book().catch((error) => console.log(error));
