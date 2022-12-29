@@ -46,7 +46,8 @@ const book = async () => {
       res.send(discountItems);
     });
     // get offer books from db 
-  } finally {
+  }
+  finally {
   }
 };
 book().catch((error) => console.log(error));
