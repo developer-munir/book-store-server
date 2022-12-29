@@ -37,7 +37,8 @@ const book = async () => {
     // get all cetegoris from db
 
     app.get("/offer/:offer", async (req, res) => {
-      const offer = req.params.offer;
+      let offer = req.params.offer;
+      console.log(offer)
       const query = { discount: offer };
       const discountItems = await productsData.find(query).limit(6).toArray();
       res.send(discountItems);
