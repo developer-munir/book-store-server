@@ -26,7 +26,6 @@ const book = async () => {
     const productCetegorisData = client.db("bookStore").collection("cetegoris");
     const usersCollection = client.db("bookStore").collection("users");
 
-
     // app.get('/update', async (req, res) => {
     //     const filter = {};
     //     const options = { upsert: true };
@@ -42,7 +41,7 @@ const book = async () => {
     //     const result = await productsData.updateMany(filter, updateDoc, options);
     //     res.send(result);
     // })
-    // any colleaciton for update funtion 
+    // any colleaciton for update funtion
 
     app.get("/products", async (req, res) => {
       const books = await productsData.find({}).toArray();
@@ -62,39 +61,55 @@ const book = async () => {
       const discountItems = await productsData.find(query).limit(6).toArray();
       res.send(discountItems);
     });
-    // get offer books from db 
+    // get offer books from db
 
-    app.get('/trendsell', async (req, res) => {
+    app.get("/trendsell", async (req, res) => {
       const query = { trendSell: true };
       const data = await productsData.find(query).toArray();
       res.send(data);
     });
-    // get trend sell products from db 
+    // get trend sell products from db
 
-    app.get('/hotsell', async (req, res) => {
+    app.get("/hotsell", async (req, res) => {
       const query = { hotSell: true };
       const data = await productsData.find(query).toArray();
       res.send(data);
     });
-    // get hot sell products from db 
+    // get hot sell products from db
 
-    app.get('/bestsell', async (req, res) => {
+    app.get("/bestsell", async (req, res) => {
       const query = { bestSell: true };
       const data = await productsData.find(query).toArray();
       res.send(data);
     });
-    // get best sell products from db 
+    // get best sell products from db
 
-    app.get('/cetegory/:id', async (req, res) => {
+    app.get("/cetegory/:id", async (req, res) => {
       const id = req.params.id;
       let query = { id: id };
       const data = await productsData.find(query).toArray();
       res.send(data);
     });
-    // category products load from db 
+    // category products load from db
 
-  }
-  finally {
+    // save user in DB
+    app.put("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await usersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+    // save user in DB
+  } finally {
   }
 };
 book().catch((error) => console.log(error));
