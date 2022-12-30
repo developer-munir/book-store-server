@@ -170,6 +170,20 @@ const book = async () => {
       const result = await whisListCollection.deleteOne(filter);
       res.send(result);
     });
+
+    // get review load Bd Start
+    app.post("/reviews", async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
+    app.get("/reviews/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { id: id };
+      const rev = await reviewCollection.find(query).toArray();
+      res.send(rev);
+    });
+    //get review load Bd End
   } finally {
   }
 };
