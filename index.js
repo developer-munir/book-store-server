@@ -25,6 +25,7 @@ const book = async () => {
     const productsData = client.db("bookStore").collection("books");
     const productCetegorisData = client.db("bookStore").collection("cetegoris");
     const usersCollection = client.db("bookStore").collection("users");
+ 
 
     // app.get('/update', async (req, res) => {
     //     const filter = {};
@@ -116,6 +117,9 @@ const book = async () => {
       res.send(result);
     });
     // save user in DB
+
+
+    //get review load Bd Start
   } finally {
   }
 };
