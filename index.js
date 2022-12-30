@@ -25,6 +25,7 @@ const book = async () => {
     const productsData = client.db("bookStore").collection("books");
     const productCetegorisData = client.db("bookStore").collection("cetegoris");
     const usersCollection = client.db("bookStore").collection("users");
+    const reviewCollection = client.db("bookStore").collection("reviews");
     const cartCollection = client.db("bookStore").collection("carts");
     const whisListCollection = client.db("bookStore").collection("whislist");
 
