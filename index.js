@@ -25,7 +25,7 @@ const book = async () => {
     const productsData = client.db("bookStore").collection("books");
     const productCetegorisData = client.db("bookStore").collection("cetegoris");
     const usersCollection = client.db("bookStore").collection("users");
- 
+    const reviewCollection = client.db("bookStore").collection("reviews");
 
     // app.get('/update', async (req, res) => {
     //     const filter = {};
@@ -118,8 +118,19 @@ const book = async () => {
     });
     // save user in DB
 
-
-    //get review load Bd Start
+    // get review load Bd Start
+    app.post("/reviews", async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
+    app.get("/reviews/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { id: id };
+      const rev = await reviewCollection.find(query).toArray();
+      res.send(rev);
+    });
+    //get review load Bd End
   } finally {
   }
 };
