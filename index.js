@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -25,6 +25,7 @@ const book = async () => {
     const productsData = client.db("bookStore").collection("books");
     const productCetegorisData = client.db("bookStore").collection("cetegoris");
     const usersCollection = client.db("bookStore").collection("users");
+ 
 
     // app.get('/update', async (req, res) => {
     //     const filter = {};
@@ -45,6 +46,13 @@ const book = async () => {
 
     app.get("/products", async (req, res) => {
       const books = await productsData.find({}).toArray();
+      res.send(books);
+    });
+
+    app.get("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const books = await productsData.findOne(query);
       res.send(books);
     });
     // get all products from db
@@ -109,6 +117,9 @@ const book = async () => {
       res.send(result);
     });
     // save user in DB
+
+
+    //get review load Bd Start
   } finally {
   }
 };
