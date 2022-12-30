@@ -130,7 +130,7 @@ const book = async () => {
       const rev = await reviewCollection.find(query).toArray();
       res.send(rev);
     });
-    //get review load Bd End //////
+    //get review load Bd End
   } finally {
   }
 };
