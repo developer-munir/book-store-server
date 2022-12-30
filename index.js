@@ -30,6 +30,8 @@ const book = async () => {
     const productsData = client.db("bookStore").collection("books");
     const productCetegorisData = client.db("bookStore").collection("cetegoris");
     const usersCollection = client.db("bookStore").collection("users");
+    const cartCollection = client.db("bookStore").collection("carts");
+    const whisListCollection = client.db("bookStore").collection("whislist");
 
     // app.get('/update', async (req, res) => {
     //     const filter = {};
