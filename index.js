@@ -1,12 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const {
-  MongoClient,
-  ServerApiVersion,
-  ObjectId,
-  ObjectId,
-} = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -30,6 +25,8 @@ const book = async () => {
     const productsData = client.db("bookStore").collection("books");
     const productCetegorisData = client.db("bookStore").collection("cetegoris");
     const usersCollection = client.db("bookStore").collection("users");
+    const cartCollection = client.db("bookStore").collection("carts");
+    const whisListCollection = client.db("bookStore").collection("whislist");
 
     // app.get('/update', async (req, res) => {
     //     const filter = {};
@@ -121,7 +118,59 @@ const book = async () => {
       res.send(result);
     });
     // save user in DB
-    
+
+    // .................. get cart product ................
+
+    app.get("/cart/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const result = await cartCollection.find(filter).toArray();
+      res.send(result);
+    });
+
+    // .................. post cart product ................
+
+    app.post("/cart", async (req, res) => {
+      const product = req.body;
+      const result = await cartCollection.insertOne(product);
+      res.send(result);
+    });
+
+    // .................. delete cart product ................
+
+    app.delete("/cart/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await cartCollection.deleteOne(filter);
+      res.send(result);
+    });
+
+    // .................. get whislist product ................
+
+    app.get("/whislist/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const result = await whisListCollection.find(filter).toArray();
+      res.send(result);
+    });
+
+    // .................. post whislist product ................
+
+    app.post("/whislist", async (req, res) => {
+      const product = req.body;
+      const result = await whisListCollection.insertOne(product);
+      res.send(result);
+    });
+
+    // .................. delete whislist product ................
+
+    app.delete("/whislist/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await whisListCollection.deleteOne(filter);
+      res.send(result);
+    });
+
     // get review load Bd Start
     app.post("/reviews", async (req, res) => {
       const review = req.body;
