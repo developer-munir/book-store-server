@@ -4,6 +4,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
 app.use(cors());
@@ -48,6 +49,7 @@ const book = async () => {
     const reviewCollection = client.db("bookStore").collection("reviews");
     const cartCollection = client.db("bookStore").collection("carts");
     const whisListCollection = client.db("bookStore").collection("whislist");
+    const paymentsCollection = client.db("bookStore").collection("payments");
 
     //==== JWT token start ======= //
     app.post("/jwt", (req, res) => {
@@ -84,8 +86,6 @@ const book = async () => {
     });
     // ==== seller verify JWT token end ====//
 
-
-
     // app.get('/update', async (req, res) => {
     //     const filter = {};
     //     const options = { upsert: true };
@@ -102,6 +102,40 @@ const book = async () => {
     //     res.send(result);
     // })
     // any colleaciton for update funtion
+
+    //=====payment Start======
+
+     app.post("/create-payment-intent", async (req, res) => {
+       const booking = req.body;
+       const price = booking.price;
+       const amount = price * 100;
+
+       const paymentIntent = await stripe.paymentIntents.create({
+         currency: "usd",
+         amount: amount,
+         payment_method_types: ["card"],
+       });
+       res.send({
+         clientSecret: paymentIntent.client_secret,
+       });
+     });
+
+     app.post("/payments", async (req, res) => {
+       const payment = req.body;
+       const result = await paymentsCollection.insertOne(payment);
+       const id = payment.bookingId;
+       const filter = { _id: ObjectId(id) };
+       const updatedDoc = {
+         $set: {
+           paid: true,
+           transactionId: payment.transactionId,
+         },
+       };
+       const updatedResult = await productsData.updateOne(filter, updatedDoc);
+       res.send(result);
+     });
+    //=====payment end======
+
 
     app.get("/products", async (req, res) => {
       const page = parseInt(req.query?.page);
