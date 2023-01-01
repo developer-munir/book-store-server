@@ -21,24 +21,77 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
-//=========jwt verify token start =============//
-const jwtVerify = (req, res, next) => {
-  const token = req.headers.authorization;
-  if (!token) {
-    return res.status(401).send({ message: "Not access token" });
+// verufy JWT token
+
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ message: "Unauthorization access !!" });
   }
-  const jot = token.split(" ")[1];
-  jwt.verify(jot, process.env.ACCESS_TOKEN, (error, decoded) => {
-    if (error) {
-      return res
-        .status(403)
-        .send({ message: "Your access error" });
+  const token = authHeader.split(" ")[1];
+  // console.log(token);
+  jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+    if (err) {
+      return res.status(402).send({
+        success: false,
+        message: "Forbidden access",
+      });
     }
     req.decoded = decoded;
     next();
   });
+}
+
+//.............verify Admin........................
+
+const verifyAdmin = async (req, res, next) => {
+  const decodedEmail = req.decoded.email;
+
+  const query = {
+    email: decodedEmail,
+  };
+
+  const user = await usersCollection.findOne(query);
+  if (user?.role !== "Admin") {
+    return res.status(403).send({
+      message: "You are not  admin,so  cannot visit this route!!",
+    });
+  }
+  next();
 };
-//=========jwt verify token end =============//
+
+//.............verify Seller........................
+
+const verifySeller = async (req, res, next) => {
+  const decodedEmail = req.decoded.email;
+  const query = {
+    email: decodedEmail,
+  };
+
+  const user = await usersCollection.findOne(query);
+  if (user?.role !== "Seller") {
+    return res.status(403).send({
+      message: "You are not  seller , so  cannot visit this route !!",
+    });
+  }
+  next();
+};
+// //.............verify Buyer........................
+
+const verifyBuyer = async (req, res, next) => {
+  const decodedEmail = req.decoded.email;
+  const query = {
+    email: decodedEmail,
+  };
+
+  const user = await usersCollection.findOne(query);
+  if (user?.role !== "Buyer") {
+    return res.status(403).send({
+      message: "You are not  Buyer , so  cannot visit this route !!",
+    });
+  }
+  next();
+};
 
 const book = async () => {
   try {
@@ -49,42 +102,42 @@ const book = async () => {
     const cartCollection = client.db("bookStore").collection("carts");
     const whisListCollection = client.db("bookStore").collection("whislist");
 
-    //==== JWT token start ======= //
-    app.post("/jwt", (req, res) => {
+    //--.............create jwt.......................--
+
+    app.get("/jwt/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const user = await usersCollection.findOne(filter);
+      if (user) {
+        const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
+          expiresIn: "7d",
+        });
+        return res.send({ token: token });
+      }
+      res.status(401).send({ token: "" });
+    });
+
+    // <.......get Role........>
+
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/user", async (req, res) => {
+      const result = await usersCollection.find({}).toArray();
+      res.send(result);
+    });
+
+    // save user in DB
+
+    app.post("/user", async (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
-        expiresIn: "10D",
-      });
-      res.send({ token });
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
     });
-    //==== JWT token end ======= //
-
-    app.get("/user/admin/:email", jwtVerify, async (req, res) => {
-      const email = req.params.email;
-      const query = { email };
-      const user = await usersData.findOne(query);
-      res.send({ isAdmin: user?.role === "admin" });
-    });
-    // ==== Admin verify JWT token end ====//
-    app.get("/user/buyer/:email", jwtVerify, async (req, res) => {
-      const email = req.params.email;
-      const query = { email };
-      const user = await usersData.findOne(query);
-
-      res.send({ isBuyer: user?.role === "buyer" });
-    });
-    // ==== buyer verify JWT token end ====//
-
-    app.get("/user/seller/:email", jwtVerify, async (req, res) => {
-      const email = req.params.email;
-      const query = { email };
-      const user = await usersData.findOne(query);
-
-      res.send({ isSeller: user?.role === "seller" });
-    });
-    // ==== seller verify JWT token end ====//
-
-
 
     // app.get('/update', async (req, res) => {
     //     const filter = {};
@@ -236,24 +289,6 @@ const book = async () => {
       const result = await usersCollection.deleteOne(filter);
       res.send(result);
     });
-
-    // save user in DB
-    app.put("/user/:email", async (req, res) => {
-      const email = req.params.email;
-      const user = req.body;
-      const filter = { email: email };
-      const options = { upsert: true };
-      const updateDoc = {
-        $set: user,
-      };
-      const result = await usersCollection.updateOne(
-        filter,
-        updateDoc,
-        options
-      );
-      res.send(result);
-    });
-    // save user in DB
 
     // .................. get cart product ................
 
