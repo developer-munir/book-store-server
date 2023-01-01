@@ -58,17 +58,6 @@ const book = async () => {
       res.send({ token });
     });
     //==== JWT token end ======= //
-    // ==== Admin verify JWT token start ====//
-    // const adminVerify = async (req, res, next) => {
-    //   const email = req.decoded.email;
-    //   const query = { email: email };
-    //   const user = await usersData.findOne(query);
-
-    //   if (user?.role !== "admin") {
-    //     return res.status(403).send("Not admin access");
-    //   }
-    //   next();
-    // };
 
     app.get("/user/admin/:email", jwtVerify, async (req, res) => {
       const email = req.params.email;
@@ -96,7 +85,7 @@ const book = async () => {
     // ==== seller verify JWT token end ====//
 
 
-    
+
     // app.get('/update', async (req, res) => {
     //     const filter = {};
     //     const options = { upsert: true };
