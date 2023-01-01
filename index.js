@@ -175,6 +175,68 @@ const book = async () => {
     });
     // category products load from db
 
+    // <................get product accoriding to seller email .................>
+
+    app.get("/product/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { sellerEmail: email };
+      const result = await productsData.find(filter).toArray();
+      res.send(result);
+    });
+
+    // <................post product .................>
+
+    app.post("/addProduct", async (req, res) => {
+      const product = req.body;
+      const result = await productsData.insertOne(product);
+      res.send(result);
+    });
+
+    // .................. delete product ................
+
+    app.delete("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await productsData.deleteOne(filter);
+      res.send(result);
+    });
+
+    // <............. get all seller .................>
+
+    app.get("/seller", async (req, res) => {
+      const filter = {
+        role: "Seller",
+      };
+      const result = await usersCollection.find(filter).toArray();
+      res.send(result);
+    });
+
+    // .................. delete seller ................
+
+    app.delete("/seller/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await usersCollection.deleteOne(filter);
+      res.send(result);
+    });
+
+    // <............. get all buyer .................>
+
+    app.get("/buyer", async (req, res) => {
+      const filter = {
+        role: "buyer",
+      };
+      const result = await usersCollection.find(filter).toArray();
+      res.send(result);
+    });
+    // .................. delete buyer ................
+    app.delete("/buyer/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await usersCollection.deleteOne(filter);
+      res.send(result);
+    });
+
     // save user in DB
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
