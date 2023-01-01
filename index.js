@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
@@ -20,6 +21,25 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+//=========jwt verify token start =============//
+const jwtVerify = (req, res, next) => {
+  const token = req.headers.authorization;
+  if (!token) {
+    return res.status(401).send({ message: "Not access token" });
+  }
+  const jot = token.split(" ")[1];
+  jwt.verify(jot, process.env.ACCESS_TOKEN, (error, decoded) => {
+    if (error) {
+      return res
+        .status(403)
+        .send({ message: "Your access error" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
+//=========jwt verify token end =============//
+
 const book = async () => {
   try {
     const productsData = client.db("bookStore").collection("books");
@@ -29,6 +49,54 @@ const book = async () => {
     const cartCollection = client.db("bookStore").collection("carts");
     const whisListCollection = client.db("bookStore").collection("whislist");
 
+    //==== JWT token start ======= //
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
+        expiresIn: "10D",
+      });
+      res.send({ token });
+    });
+    //==== JWT token end ======= //
+    // ==== Admin verify JWT token start ====//
+    // const adminVerify = async (req, res, next) => {
+    //   const email = req.decoded.email;
+    //   const query = { email: email };
+    //   const user = await usersData.findOne(query);
+
+    //   if (user?.role !== "admin") {
+    //     return res.status(403).send("Not admin access");
+    //   }
+    //   next();
+    // };
+
+    app.get("/user/admin/:email", jwtVerify, async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await usersData.findOne(query);
+      res.send({ isAdmin: user?.role === "admin" });
+    });
+    // ==== Admin verify JWT token end ====//
+    app.get("/user/buyer/:email", jwtVerify, async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await usersData.findOne(query);
+
+      res.send({ isBuyer: user?.role === "buyer" });
+    });
+    // ==== buyer verify JWT token end ====//
+
+    app.get("/user/seller/:email", jwtVerify, async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await usersData.findOne(query);
+
+      res.send({ isSeller: user?.role === "seller" });
+    });
+    // ==== seller verify JWT token end ====//
+
+
+    
     // app.get('/update', async (req, res) => {
     //     const filter = {};
     //     const options = { upsert: true };
@@ -47,8 +115,24 @@ const book = async () => {
     // any colleaciton for update funtion
 
     app.get("/products", async (req, res) => {
-      const books = await productsData.find({}).toArray();
-      res.send(books);
+      const page = parseInt(req.query?.page);
+      const size = parseInt(req.query?.size);
+      const keyword = req.query.keyword;
+      const books = await productsData
+        .find({})
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const data = books;
+      const count = await productsData.estimatedDocumentCount();
+
+      if (keyword) {
+        let data = books.filter((item) =>
+          item.title.toLowerCase().includes(keyword.toLocaleLowerCase())
+        );
+        return res.send({ data, count });
+      }
+      res.send({ data, count });
     });
 
     app.get("/products/:id", async (req, res) => {
